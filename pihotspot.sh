@@ -462,12 +462,48 @@ if [ -d /etc/dnsmasq.conf ];
         rm  /etc/dnsmasq.conf
         cat >> /etc/dnsmasq.conf << EOT
         domain-needed
+        domain=torogoz-ap.com
+        server=8.8.8.8
         interface=$LAN_INTERFACE
         dhcp-range=192.168.10.20,192.168.10.250,255.255.255.0,12h
+        EOT
+
+        check_returned_code $?
+fi
+
+#PARA LA CACHE DNS
+if [ -d /etc/resolv.dnsmasq.conf ];
+    then
+        cat /etc/resolv.dnsmasq.conf | sudo tee -a /etc/resolv.dnsmasq.conf.old.`date +%F-%R`   
+
+    else        
+        execute_command "apt-get install dnsmasq -y" true "Instalando dnsmasq."
+        rm  /etc/resolv.dnsmasq.conf
+        cat >> /etc/resolv.dnsmasq.conf << EOT
+        nameserver 127.0.0.1   
         EOT
         check_returned_code $?
 fi
 
+#PARA RESOLV 
+if [ -d /etc/resolv.conf ];
+    then
+        cat /etc/resolv.conf | sudo tee -a /etc/resolv.conf.old.`date +%F-%R`  
+        rm /etc/resolv.conf 
+
+    else
+        cat >> /etc/resolv.conf << EOT
+        nameserver 127.0.0.1
+        EOT
+
+        check_returned_code $?
+fi
+
+
+
+service dnsmasq stop
+service dnsmasq start
+check_returned_code $?
 
 if [ $BLUETOOTH_ENABLED = "N" ]; then
     display_message "Disable integrated Bluetooth support (After next reboot)"
