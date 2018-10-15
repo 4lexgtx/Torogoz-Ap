@@ -18,7 +18,7 @@ HOTSPOT_IP="192.168.10.1"
 WIFI_COUNTRY_CODE="ES"
 # Use HTTPS to connect to web portal
 # Set value to Y or N
-HOTSPOT_HTTPS="N"
+HOTSPOT_HTTPS="Y"
 # Network where the hotspot is located
 HOTSPOT_NETWORK="192.168.10.0"
 # Secret word for FreeRadius
@@ -31,7 +31,7 @@ LAN_INTERFACE="wlan1"
 LAN_WIFI_DRIVER="nl80211"
 # Install Haserl (required if you want to use the default Coova Portal)
 # Set value to Y or N
-HASERL_INSTALL="N"
+HASERL_INSTALL="Y"
 # Password used for the generation of the certificate
 CERT_PASSWORD="pihotspot"
 
@@ -47,7 +47,7 @@ DALORADIUS_INSTALL="Y"
 # Set value to Y or N
 BLUETOOTH_ENABLED="N"
 # Enable/Disable fail2ban to protect server from unwanted access
-# Set value to Y or N
+# Set value to Y or admin
 FAIL2BAN_ENABLED="N"
 # Enable/Disable Netflow logs to log all traffic requests. Must be crossed checked with assigned IP in the radius tables
 # Set value to Y or N
@@ -1009,7 +1009,6 @@ sed -i "/XXXXXX/s/XXXXXX/$HOTSPOT_IP/g" /usr/share/nginx/portal/js/configuration
 check_returned_code $?
 
 execute_command "nginx -t" true "Checking Nginx configuration file"
-
 display_message "Adding Freeradius in systemd startup"
 echo "
 [Unit]
