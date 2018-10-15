@@ -3,19 +3,19 @@
 # PLEASE EDIT NEXT LINES TO DEFINE YOUR OWN CONFIGURATION
 
 # Name of the log file
-LOGNAME="kupiki_hotspot.log"
+LOGNAME="torogoz-ap_hotspot.log"
 # Path where the logfile will be stored
 # be sure to add a / at the end of the path
 LOGPATH="/var/log/"
 # Password for user root (MySql/MariaDB not system)
 MYSQL_PASSWORD="pihotspot"
 # Name of the hotspot that will be visible for users/customers
-HOTSPOT_NAME="kupikihotspot"
-# IP of the hotspot
+HOTSPOT_NAME="torogoz-ap"
+# IP del hotspot
 HOTSPOT_IP="192.168.10.1"
 # Wi-fi code country. Use above link to find yours
 # https://www.cisco.com/c/en/us/td/docs/wireless/wcs/3-2/configuration/guide/wcscfg32/wcscod.html
-WIFI_COUNTRY_CODE="FR"
+WIFI_COUNTRY_CODE="ES"
 # Use HTTPS to connect to web portal
 # Set value to Y or N
 HOTSPOT_HTTPS="N"
@@ -25,8 +25,8 @@ HOTSPOT_NETWORK="192.168.10.0"
 FREERADIUS_SECRETKEY=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
 # WAN interface (the one with Internet - default 'eth0' or long name for Debian 9+)
 WAN_INTERFACE=`ip link show | grep '^[1-9]' | awk -F ':' '{print $2}' | awk '{$1=$1};1' | grep '^e'`
-# LAN interface (the one for the hotspot)
-LAN_INTERFACE="wlan0"
+# LAN interface (the one for the hotspot) realtek RTL8192CU
+LAN_INTERFACE="wlan1"
 # Wifi driver
 LAN_WIFI_DRIVER="nl80211"
 # Install Haserl (required if you want to use the default Coova Portal)
@@ -34,6 +34,7 @@ LAN_WIFI_DRIVER="nl80211"
 HASERL_INSTALL="N"
 # Password used for the generation of the certificate
 CERT_PASSWORD="pihotspot"
+
 # Number of days to certify the certificate for (default 2 years)
 CERT_DAYS="730"
 # Make Avahi optional
@@ -64,7 +65,7 @@ MAC_AUTHENTICATION_ENABLED="N"
 MAC_AUTHENTICATION_PASSWORD="123456"
 # Install web frontend of Kupiki Hotspot
 # Set value to Y or N
-INSTALL_KUPIKI_ADMIN=N
+INSTALL_KUPIKI_ADMIN=Y
 # Install Cron job for the hotspot updater. Will be executed every sunday at 8am (system time)
 # Set value to Y or N
 ADD_CRON_UPDATER=Y
@@ -447,6 +448,27 @@ notify_package_updates_available
 
 install_dependent_packages PIHOTSPOT_DEPS_START[@]
 
+#PARA SERVIDOR DHCP CON DNSMASQ
+ # copiar las configuraciones actuales del archivo 
+
+
+if [ -d /etc/dnsmasq.conf ];
+    then
+        cat /etc/dnsmasq.conf | sudo tee -a /etc/dnsmasq.conf.old.`date +%F-%R`
+        execute_command "apt-get purge dnsmasq -y" true "Eliminando versiones anteriores de dnsmasq."
+
+    else        
+        execute_command "apt-get install dnsmasq -y" true "Instalando dnsmasq."
+        rm  /etc/dnsmasq.conf
+        cat >> /etc/dnsmasq.conf << EOT
+        domain-needed
+        interface=$LAN_INTERFACE
+        dhcp-range=192.168.10.20,192.168.10.250,255.255.255.0,12h
+        EOT
+        check_returned_code $?
+fi
+
+
 if [ $BLUETOOTH_ENABLED = "N" ]; then
     display_message "Disable integrated Bluetooth support (After next reboot)"
     echo "
@@ -552,17 +574,19 @@ fi
 
 execute_command "grep $LAN_INTERFACE /etc/network/interfaces" false "Update interface configuration ($LAN_INTERFACE)"
 if [ $COMMAND_RESULT -ne 0 ]; then
-cat >> /etc/network/interfaces << EOT
+    cat >> /etc/network/interfaces << EOT
 
-auto $LAN_INTERFACE
-allow-hotplug $LAN_INTERFACE
-iface $LAN_INTERFACE inet static
-    address $HOTSPOT_IP
-    netmask 255.255.255.0
-    network $HOTSPOT_NETWORK
-    post-up echo 1 > /proc/sys/net/ipv4/ip_forward
-EOT
-    check_returned_code $?
+    auto $LAN_INTERFACE
+    allow-hotplug $LAN_INTERFACE
+    iface $LAN_INTERFACE inet static
+        address $HOTSPOT_IP
+        netmask 255.255.255.0
+        network $HOTSPOT_NETWORK
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+    EOT
+
+
+        check_returned_code $?
 fi
 
 execute_command "grep '^country=' /etc/wpa_supplicant/wpa_supplicant.conf" false "Update wifi configuration to add country code"
