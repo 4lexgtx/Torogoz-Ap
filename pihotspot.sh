@@ -386,7 +386,7 @@ install_dnsmasq() {
         server=8.8.8.8
         interface=$LAN_INTERFACE
         dhcp-range=192.168.10.20,192.168.10.250,255.255.255.0,12h
-        EOT
+EOT
         check_returned_code $?
     fi
 
@@ -396,7 +396,7 @@ install_dnsmasq() {
     else
         cat >> /etc/resolv.dnsmasq.conf << EOT
         nameserver 127.0.0.1   
-        EOT
+EOT
         check_returned_code $?
     fi
 #PARA RESOLV 
@@ -407,7 +407,7 @@ if [[ -f /etc/resolv.conf ]]; then
 else
     cat >> /etc/resolv.conf << EOT
     nameserver 127.0.0.1
-    EOT
+EOT
     check_returned_code $?
 
 fi
@@ -417,7 +417,6 @@ service dnsmasq start
 check_returned_code $?
 
 }
-
 
 
 
