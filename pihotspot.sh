@@ -458,7 +458,7 @@ install_dependent_packages PIHOTSPOT_DEPS_START[@]
 
 install_dnsmasq() {
 
-    if [ -d /etc/dnsmasq.conf ];
+    if [ -f /etc/dnsmasq.conf ];
         then
             cat /etc/dnsmasq.conf | sudo tee -a /etc/dnsmasq.conf.old.`date +%F-%R`
             execute_command "apt-get purge dnsmasq -y" true "Eliminando versiones anteriores de dnsmasq."
@@ -479,13 +479,11 @@ install_dnsmasq() {
 
 
     #PARA LA CACHE DNS
-    if [ -d /etc/resolv.dnsmasq.conf ];
+    if [ -f /etc/resolv.dnsmasq.conf ];
         then
             cat /etc/resolv.dnsmasq.conf | sudo tee -a /etc/resolv.dnsmasq.conf.old.`date +%F-%R`   
 
-        else        
-            execute_command "apt-get install dnsmasq -y" true "Instalando dnsmasq."
-            rm  /etc/resolv.dnsmasq.conf
+        else 
             cat >> /etc/resolv.dnsmasq.conf << EOT
             nameserver 127.0.0.1   
             EOT
@@ -493,7 +491,7 @@ install_dnsmasq() {
     fi
 
     #PARA RESOLV 
-    if [ -d /etc/resolv.conf ];
+    if [ -f /etc/resolv.conf ];
         then
             cat /etc/resolv.conf | sudo tee -a /etc/resolv.conf.old.`date +%F-%R`  
             rm /etc/resolv.conf 
@@ -505,9 +503,10 @@ install_dnsmasq() {
 
             check_returned_code $?
     fi
-service dnsmasq stop
-service dnsmasq start
-check_returned_code $?
+    service dnsmasq stop
+    service dnsmasq start
+    check_returned_code $?
+
 }
 
 
