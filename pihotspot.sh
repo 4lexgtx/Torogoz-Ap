@@ -1,9 +1,6 @@
 #!/bin/bash
 
 
-if [[ condition ]]; then
-    #statements
-fi
 #Segunda modificacion desde Desktop
 # PLEASE EDIT NEXT LINES TO DEFINE YOUR OWN CONFIGURATION
 
