@@ -396,6 +396,8 @@ EOT
         check_returned_code $?
     fi
 
+
+
     execute_command "apt-get purge dnsmasq -y" true "Eliminiando versiones anteriores de dnsmasq."
     execute_command "apt-get install dnsmasq -y" true "Instalando dnsmasq."
 
@@ -545,7 +547,7 @@ if [ $COMMAND_RESULT -ne 0 ]; then
     fi
 fi
 
-execute_command "/sbin/ifconfig -a | grep $LAN_INTERFACE" false "Checking if wlan0 interface already exists"
+execute_command "/sbin/ifconfig -a | grep $LAN_INTERFACE" false "Checking if wlan1 interface already exists"
 if [ $COMMAND_RESULT -ne 0 ]; then
     display_message "Wifi interface not found. Upgrading the system first"
 
@@ -913,10 +915,12 @@ if [ $DALORADIUS_INSTALL = "Y" ]; then
     echo 'drop table if exists radius.radacct, radius.radcheck, radius.radgroupcheck, radius.radgroupreply, radius.radreply, radius.radusergroup, radius.radpostauth, radius.nas ;' | mariadb -u root -p$MYSQL_PASSWORD
     check_returned_code $?
 
+
+#se crea la base de dartos con todas las tablas
     display_message "Reload original Freeradius schema"
     mariadb -u root -p$MYSQL_PASSWORD radius < /etc/freeradius/3.0/mods-config/sql/main/mysql/schema.sql
     check_returned_code $?
-
+#todos los permisos para las tablas de la base radius con el usuario radius en el server
     display_message "Creating users privileges for localhost"
     echo "GRANT ALL ON radius.* to 'radius'@'localhost';" > /tmp/grant.sql
     check_returned_code $?
@@ -925,12 +929,14 @@ if [ $DALORADIUS_INSTALL = "Y" ]; then
     mysql -u root -p$MYSQL_PASSWORD < /tmp/grant.sql
     check_returned_code $?
 
+#usuario y password de la base de dalo radius
     display_message "Configuring daloradius DB user name"
     sed -i "s/\$configValues\['CONFIG_DB_USER'\] = 'root';/\$configValues\['CONFIG_DB_USER'\] = 'radius';/g" /usr/share/nginx/html/daloradius/library/daloradius.conf.php
     check_returned_code $?
     display_message "Configuring daloradius DB user password"
     sed -i "s/\$configValues\['CONFIG_DB_PASS'\] = '';/\$configValues\['CONFIG_DB_PASS'\] = 'radpass';/g" /usr/share/nginx/html/daloradius/library/daloradius.conf.php
     check_returned_code $?
+#usuario y password de la base de dalo radius
 
     display_message "Building NGINX configuration (default listen port : 80)"
     echo '
