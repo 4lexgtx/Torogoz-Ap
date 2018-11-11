@@ -21,41 +21,41 @@ su - kupiki -c "cd /home/kupiki/Kupiki-Hotspot-Admin-Frontend && HOST='`ip -4 ro
 
 display_message "Starting backend using PM2"
 su - kupiki -c "cd /home/kupiki/Kupiki-Hotspot-Admin-Backend && pm2 start --name backend npm -- start"
-check_returned_code $?
+
 
 display_message "Starting packages installation with npm"
 su - kupiki -c "cd /home/kupiki/Kupiki-Hotspot-Admin-Backend && export NODE_ENV= && npm install"
-check_returned_code $?
+
 
 ##########################FRONTEND############################
 
 display_message "Start packages installation with npm"
 su - kupiki -c "cd /home/kupiki/Kupiki-Hotspot-Admin-Frontend && export NODE_ENV= && npm install"
-check_returned_code $?
+
 
 display_message "Rebuilding node-sass for Raspberry Pi"
 su - kupiki -c "cd /home/kupiki/Kupiki-Hotspot-Admin-Frontend && npm rebuild node-sass"
-check_returned_code $?
+
 
 display_message "Starting interface via PM2"
 su - kupiki -c "cd /home/kupiki/Kupiki-Hotspot-Admin-Frontend && HOST='`ip -4 route get 8.8.8.8 | awk {'print $7'} | tr -d '\n'`' pm2 start --name frontend npm -- start"
-check_returned_code $?
+
 
 display_message "Saving PM2 configuration"
 su - kupiki -c "cd /home/kupiki && pm2 save"
-check_returned_code $?
+
 
 display_message "Adding server as a service"
 su - kupiki -c "pm2 startup systemd"
-#check_returned_code $?
+#
 
 display_message "Generating service files for PM2"
 /usr/bin/pm2 startup systemd -u kupiki --hp /home/kupiki
-check_returned_code $?
+
 
 display_message "Make service executable"
 chmod -x /etc/systemd/system/pm2-kupiki.service
-check_returned_code $?
+
 
 display_message "Creating backend script folder"
 mkdir /etc/kupiki && chmod 700 /etc/kupiki
@@ -63,9 +63,9 @@ mkdir /etc/kupiki && chmod 700 /etc/kupiki
 
 display_message "Cloning backend script in /etc/kupiki"
 cp /root/Kupiki-Hotspot-Admin-Backend-Script/kupiki.sh /etc/kupiki/
-check_returned_code $?
+
 chmod 700 /etc/kupiki/kupiki.sh
-check_returned_code $?
+
 
 
 ##########################BACKEND############################
@@ -88,13 +88,13 @@ check_returned_code $?
 
 display_message "Removing all lines for kupiki in /etc/sudoers"
 sed -i 's/^kupiki ALL.*//g' /etc/sudoers
-check_returned_code $?
+
 
 display_message "Updating /etc/sudoers"
 echo '
 kupiki ALL=(ALL) NOPASSWD:/etc/kupiki/kupiki.sh
 ' >> /etc/sudoers
-check_returned_code $?
+
 
 
 display_message "Creating the upgrade script for Kupiki Hotspot Admin"
@@ -121,17 +121,17 @@ chmod 700 /etc/kupiki/kupiki.sh
 # entonces para que en cada reinicio se actualize hay que agregarlo al rc.local
 
 
-check_returned_code $?
+
 chmod +x /root/updateKupiki.sh
-check_returned_code $?
+
 
 display_message "Installing some freeradius tools"
 apt-get install -y freeradius-utils
-check_returned_code $?
+
 
 display_message "Adding Collectd plugin"
 sed -i "s/^#LoadPlugin unixsock/LoadPlugin unixsock/" /etc/collectd/collectd.conf
-check_returned_code $?
+
 
 echo '
 <Plugin unixsock>
@@ -140,13 +140,13 @@ echo '
         SocketPerms "0660"
         DeleteSocket false
 </Plugin>' >> /etc/collectd/collectd.conf
-check_returned_code $?
+
 # COLLECTED es un servicio que recibe estadisticas del sistema y las pon e a dicpisicion
 display_message "Restarting Collectd"
 service collectd restart
-check_returned_code $?
+
 
 display_message "Restarting Mysql"
 service mysql restart
-check_returned_code $?
+
 exit 0
