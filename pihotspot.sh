@@ -1083,7 +1083,7 @@ EOT
 fi
 
 display_message "Create banner on login"
-/usr/bin/figlet -f lean -c "Kupiki Hotspot" | tr ' _/' ' /' > /etc/ssh/kupiki-banner
+/usr/bin/figlet -f lean -c "Torogoz AP" | tr ' _/' ' /' > /etc/ssh/torogoz-banner
 check_returned_code $?
 
 display_message "Append script version to the banner"
@@ -1095,16 +1095,17 @@ Kupiki Hotspot - Version $KUPIKI_VERSION - (c) www.pihomeserver.fr
 check_returned_code $?
 
 display_message "Changing banner rights"
-chmod 644 /etc/ssh/kupiki-banner && chown root:root /etc/ssh/kupiki-banner
+chmod 644 /etc/ssh/torogoz-banner && chown root:root /etc/ssh/torogoz-banner
 check_returned_code $?
 
 display_message "Activating the banner for SSH"
-sed -i "s?^#Banner.*?Banner /etc/ssh/kupiki-banner?g" /etc/ssh/sshd_config
+sed -i "s?^#Banner.*?Banner /etc/ssh/torogoz-banner?g" /etc/ssh/sshd_config
 check_returned_code $?
 
 display_message ""
-sed -i "s?^Banner.*?Banner /etc/ssh/kupiki-banner?g" /etc/ssh/sshd_config
+sed -i "s?^Banner.*?Banner /etc/ssh/torogoz-banner?g" /etc/ssh/sshd_config
 check_returned_code $?
+
 
 execute_command "service freeradius start" true "Starting freeradius service"
 
